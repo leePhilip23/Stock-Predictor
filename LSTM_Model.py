@@ -1,18 +1,14 @@
-#!/usr/bin/env python
-# coding: utf-8
+# Code all done in Jupyter Notebooks
 
-# In[5]:
-
-
+# In[1]:
 import pandas as pd
 
-df = pd.read_csv('GOOG.csv')
+# reads stock files
+df = pd.read_csv('stock.csv')
 df
 
 
-# In[6]:
-
-
+# In[2]:
 import datetime
 
 # Convert To Date Object
@@ -22,28 +18,24 @@ def convertToDate(s):
     return datetime.datetime(year = year, month = month, day = day)
 
 
-# In[7]:
-
-
+# In[3]:
+# Makes 'Date' the index
 df['Date'] = df['Date'].apply(convertToDate)
 df.index = df.pop('Date')
 df
 
 
-# In[8]:
-
-
+# In[4]:
 import matplotlib.pyplot as plt
 
+# Plots the original stock data
 plt.plot(df.index, df['Close'])
 
 
-# In[70]:
-
-
-# Since it's LSTM model convert to supervised learning problem
+# In[5]:
 import numpy as np
 
+# Since it's LSTM model convert to supervised learning problem
 def convertToSupervised(dataframe, first_date_str, last_date_str, n = 3):
     firstDate = first_date_str.split('-')
     lastDate = last_date_str.split('-')
@@ -60,7 +52,6 @@ def convertToSupervised(dataframe, first_date_str, last_date_str, n = 3):
     last_time = False
     while True:
         df_subset = dataframe.loc[:target_date].tail(n+1)
-        #print(f'{dataframe.loc[:target_date].tail(n)}')
 
         if len(df_subset) != n+1:
             print(f'Error: Window size {n} is too large for date {target_date}')
@@ -110,12 +101,9 @@ priceWindow = convertToSupervised(df, minTime[:10], maxTime[:10], 3)
 priceWindow
 
 
-# In[71]:
+# In[6]:
 
-
-# Turn "Days Before" into input and "Target" into output to
-# feed into Tensorflow
-
+# Turn "Days Before" into input and "Target" into output to feed into Tensorflow
 def changeToArrValues(dataFrameWindow):
     df_as_np = dataFrameWindow.to_numpy()
     
@@ -130,30 +118,9 @@ def changeToArrValues(dataFrameWindow):
 
 dates, X, Y = changeToArrValues(priceWindow)
 
-dates.shape, X.shape, Y.shape
+# In[7]:
 
-
-# In[72]:
-
-
-q_80 = int(len(dates) * .8)
-q_90 = int(len(dates) * .9)
-
-dates_train, x_train, y_train, = dates[:q_80], X[:q_80], Y[:q_80]
-
-dates_val, x_val, y_val = dates[q_80:q_90], X[q_80:q_90], Y[q_80:q_90]
-dates_test, x_test, y_test = dates[q_90:], X[q_90:], Y[q_90:]
-
-plt.plot(dates_train, y_train)
-plt.plot(dates_val, y_val)
-plt.plot(dates_test, y_test)
-
-plt.legend(['Train', 'Validation', 'Test'])
-
-
-# In[73]:
-
-
+# Train LSTM Model and makes Predictions
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import layers
@@ -171,38 +138,9 @@ model.compile(loss='mse',
 model.fit(x_train, y_train, validation_data=(x_val, y_val), epochs=100)
 
 
-# In[74]:
+# In[8]
 
-
-train_predictions = model.predict(x_train).flatten()
-
-plt.plot(dates_train, train_predictions)
-plt.plot(dates_train, y_train)
-plt.legend(['Training Predictions', 'Training Observations'])
-
-
-# In[75]:
-
-
-val_predictions = model.predict(x_val).flatten()
-plt.plot(dates_val, val_predictions)
-plt.plot(dates_val, y_val)
-plt.legend(['Validation Predictions', 'Validation Observations'])
-
-
-# In[76]:
-
-
-test_predictions = model.predict(x_test).flatten()
-
-plt.plot(dates_test, test_predictions)
-plt.plot(dates_test, y_test)
-plt.legend(['Testing Predictions', 'Testing Observations'])
-
-
-# In[77]:
-
-
+# Plots the predicted Data
 plt.plot(df.index, df['Close'])
 plt.plot(dates_train, train_predictions)
 plt.plot(dates_val, val_predictions)

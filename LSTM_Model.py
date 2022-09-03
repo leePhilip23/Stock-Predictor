@@ -19,6 +19,7 @@ def convertToDate(s):
 
 
 # In[3]:
+
 # Makes 'Date' the index
 df['Date'] = df['Date'].apply(convertToDate)
 df.index = df.pop('Date')

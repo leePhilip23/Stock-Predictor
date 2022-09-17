@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Price Prediction </title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="app.js"></script>
+	<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="img"></div>
+<form class="form">
+	<h2>Choose First Date</h2>
+	<div class="firstDate" name="" id="1stDate">
+		option value="" disabled="disabled" selected="selected">Choose a date</option>
+		<option>firstDate</option>
+	</div>
+  <h2>Choose Second Date</h2>
+	<div class="secondDate" name="" id="2ndDate">
+		option value="" disabled="disabled" selected="selected">Choose a date</option>
+		<option>secondDate</option>
+	</div>
+		<h2>Stock Type</h2>
+	<div>
+  <select class="stockType" name="" id="uistocks">
+    <option value="" disabled="disabled" selected="selected">Choose a stock</option>
+		<option>stock type</option>
+  </select>
+</div>
+	<button class="submit" onclick="onClickedEstimatePrice()" type="button">Estimate Price</button>
+	<div id="uiEstimatedPrice" class="result">	<h2></h2> </div>
+</body>
+</html>

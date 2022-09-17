@@ -1,15 +1,17 @@
-# Code all done in Jupyter Notebooks
-
-# In[1]:
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+from keras.models import Sequential
+from keras.layers.core import Dense, Activation, Dropout
+from keras.layers import LSTM
+import time
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_squared_error
+import pickle
+import json
 
-# reads stock files
-df = pd.read_csv('stock.csv')
-df
 
-
-# In[2]:
-import datetime
 
 # Convert To Date Object
 def convertToDate(s):
@@ -17,24 +19,6 @@ def convertToDate(s):
     year, month, day = int(date[0]), int(date[1]), int(date[2])
     return datetime.datetime(year = year, month = month, day = day)
 
-
-# In[3]:
-
-# Makes 'Date' the index
-df['Date'] = df['Date'].apply(convertToDate)
-df.index = df.pop('Date')
-df
-
-
-# In[4]:
-import matplotlib.pyplot as plt
-
-# Plots the original stock data
-plt.plot(df.index, df['Close'])
-
-
-# In[5]:
-import numpy as np
 
 # Since it's LSTM model convert to supervised learning problem
 def convertToSupervised(dataframe, first_date_str, last_date_str, n = 3):
@@ -95,14 +79,13 @@ def convertToSupervised(dataframe, first_date_str, last_date_str, n = 3):
 
     return ret_df
 
-minTime = str(min(df.index))
-maxTime = str(max(df.index))
-priceWindow = convertToSupervised(df, minTime[:10], maxTime[:10], 3)
+    minTime = str(min(df.index))
+    maxTime = str(max(df.index))
+    priceWindow = convertToSupervised(df, minTime[:10], maxTime[:10], 3)
 
-priceWindow
+    return priceWindow
 
 
-# In[6]:
 
 # Turn "Days Before" into input and "Target" into output to feed into Tensorflow
 def changeToArrValues(dataFrameWindow):
@@ -117,37 +100,61 @@ def changeToArrValues(dataFrameWindow):
     
     return dates, X.astype(np.float32), Y.astype(np.float32)
 
-dates, X, Y = changeToArrValues(priceWindow)
-
-# In[7]:
-
-# Train LSTM Model and makes Predictions
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras import layers
-
-model = Sequential([layers.Input((3, 1)),
-                    layers.LSTM(64),
-                    layers.Dense(32, activation='relu'),
-                    layers.Dense(32, activation='relu'),
-                    layers.Dense(1)])
-
-model.compile(loss='mse', 
-              optimizer = Adam(learning_rate = 0.001),
-              metrics=['mean_absolute_error'])
-
-model.fit(x_train, y_train, validation_data=(x_val, y_val), epochs=100)
 
 
-# In[8]
+if __name__ == '__main__':
+    df = pd.read_csv('GOOGLE.csv')
+    # df2 = pd.read_csv('NVDIA.csv')
+    # df3 = pd.read_csv('NASDAQ.csv')
+    # df4 = pd.read_csv('MSFT.csv')
+    # df5 = pd.read_csv('META.csv')
 
-# Plots the predicted Data
-plt.plot(df.index, df['Close'])
-plt.plot(dates_train, train_predictions)
-plt.plot(dates_val, val_predictions)
-plt.plot(dates_test, test_predictions)
-plt.legend(['Actual Price',
-            'Training Predictions',
-            'Validation Predictions',
-            'Testing Predictions'])
+    # Makes 'Date' the index
+    df['Date'] = df['Date'].apply(convertToDate)
+    df.index = df.pop('Date')
+    df
 
+
+    # Plots the original stock data
+    plt.plot(df.index, df['Close'])
+
+    dates, X, Y = changeToArrValues(priceWindow)
+
+    
+    # Model Prediction
+    model = Sequential([layers.Input((3, 1)),
+                        layers.LSTM(64),
+                        layers.Dense(32, activation='relu'),
+                        layers.Dense(32, activation='relu'),
+                        layers.Dense(1)])
+
+    model.compile(loss='mse', 
+                  optimizer = Adam(learning_rate = 0.001),
+                  metrics=['mean_absolute_error'])
+
+    model.fit(x_train, y_train, validation_data=(x_val, y_val), epochs=100)
+
+    # Plots the predicted Data
+    plt.plot(df.index, df['Close'])
+    plt.plot(dates_train, train_predictions)
+    plt.plot(dates_val, val_predictions)
+    plt.plot(dates_test, test_predictions)
+    plt.legend(['Actual Price',
+                'Training Predictions',
+                'Validation Predictions',
+                'Testing Predictions'])
+    
+    
+    # Store ML model in pickle file
+    with open('LSTM_Model.pickle', 'wb') as f:
+        pickle.dump(model, f)
+
+    # Store columns of dataframe in json file
+    columns = {
+        'dataColumns' : [col.lower() for col in df.columns]
+    }
+    
+    with open("columns.json", "w") as f:
+        f.write(json.dumps(columns)
+        
+    

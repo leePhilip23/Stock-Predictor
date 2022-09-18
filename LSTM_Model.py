@@ -104,7 +104,7 @@ def changeToArrValues(dataFrameWindow):
 
 if __name__ == '__main__':
     df = pd.read_csv('GOOGLE.csv')
-    # df2 = pd.read_csv('NVDIA.csv')
+    # df2 = pd.read_csv('NVIDIA.csv')
     # df3 = pd.read_csv('NASDAQ.csv')
     # df4 = pd.read_csv('MSFT.csv')
     # df5 = pd.read_csv('META.csv')
